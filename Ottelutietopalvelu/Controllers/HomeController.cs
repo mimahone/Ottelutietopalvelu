@@ -1,30 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using Ottelutietopalvelu.Models;
+using Ottelutietopalvelu.Services;
+using System;
 using System.Web.Mvc;
 
 namespace Ottelutietopalvelu.Controllers
 {
   public class HomeController : Controller
   {
+    /// <summary>
+    /// Default method: Get all matches list
+    /// </summary>
+    /// <returns>View</returns>
     public ActionResult Index()
     {
-      return View();
+      MatchesModel model = new MatchesModel();
+      model.StartDate = null;
+      model.EndDate = null;
+
+      MatchService service = new MatchService();
+      service.ReadAllMatches();
+      model.Matches = service.MatchList;
+
+      return View(model);
     }
 
-    public ActionResult About()
+    /// <summary>
+    /// Get matches list within period
+    /// </summary>
+    /// <param name="startDate">Start Date of Search Period</param>
+    /// <param name="endDate">End Date of Search Period</param>
+    /// <returns>View</returns>
+    [HttpPost]
+    public ActionResult Index(DateTime? startDate, DateTime? endDate)
     {
-      ViewBag.Message = "Your application description page.";
+      MatchesModel model = new MatchesModel();
+      model.StartDate = startDate;
+      model.EndDate = endDate;
 
-      return View();
+      MatchService service = new MatchService();
+
+      if (startDate.HasValue && endDate.HasValue)
+      {
+        service.MatchesByPeriod(startDate.Value, endDate.Value);
+      }
+      else
+      {
+        service.ReadAllMatches();
+      }
+
+      model.Matches = service.MatchList;
+
+      return View(model);
     }
 
-    public ActionResult Contact()
-    {
-      ViewBag.Message = "Your contact page.";
-
-      return View();
-    }
   }
 }

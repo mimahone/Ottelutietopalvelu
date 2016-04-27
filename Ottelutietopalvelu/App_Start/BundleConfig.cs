@@ -21,10 +21,13 @@ namespace Ottelutietopalvelu
 
       bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
                 "~/Scripts/bootstrap.js",
+                "~/Scripts/moment-with-locales*",
+                "~/Scripts/bootstrap-datetimepicker*",
                 "~/Scripts/respond.js"));
 
       bundles.Add(new StyleBundle("~/Content/css").Include(
                 "~/Content/bootstrap.css",
+                "~/Content/bootstrap-datetimepicker.css",
                 "~/Content/site.css"));
     }
   }
