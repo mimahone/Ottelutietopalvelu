@@ -53,5 +53,34 @@ namespace Ottelutietopalvelu.Controllers
       return View(model);
     }
 
+    /// <summary>
+    /// Get matched list within period as Json
+    /// </summary>
+    /// <param name="startDate">Start Date of Search Period</param>
+    /// <param name="endDate">End Date of Search Period</param>
+    /// <returns>Matches list as Json</returns>
+    public JsonResult GetMatches(DateTime? startDate, DateTime? endDate)
+    {
+      try
+      {
+        MatchService service = new MatchService();
+
+        if (startDate.HasValue && endDate.HasValue)
+        {
+          service.MatchesByPeriod(startDate.Value, endDate.Value);
+        }
+        else
+        {
+          service.ReadAllMatches();
+        }
+        
+        return Json(service.MatchList, JsonRequestBehavior.AllowGet);
+      }
+      catch (Exception ex)
+      {
+        throw ex;
+      }
+    }
+
   }
 }

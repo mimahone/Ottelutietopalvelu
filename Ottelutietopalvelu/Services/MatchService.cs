@@ -7,6 +7,9 @@ using System.Linq;
 
 namespace Ottelutietopalvelu.Services
 {
+  /// <summary>
+  /// Class for MatchService
+  /// </summary>
   public class MatchService
   {
     #region Properties

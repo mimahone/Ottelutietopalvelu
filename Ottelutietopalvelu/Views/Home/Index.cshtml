@@ -34,6 +34,7 @@
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">Hae pelit</button>
+            <button type="button" class="btn btn-default" id="GetGames">Hae pelit (Ajax)</button>
         </fieldset>
   }
     </div>
@@ -49,7 +50,7 @@
                     <th>Tulos</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="matchesTbody">
                 @{
                   foreach (var match in Model.Matches)
                   {
@@ -105,18 +106,85 @@
 @section scripts {
     <script type="text/javascript">
         $(function () {
-            $('.datetimepicker').datetimepicker({
-                format: 'L',
-                locale: 'fi'
+            $(".datetimepicker").datetimepicker({
+                format: "L",
+                locale: "fi"
             });
 
             $("#StartDatePicker").on("dp.change", function (e) {
-                $('#EndDatePicker').data("DateTimePicker").minDate(e.date);
+                $("#EndDatePicker").data("DateTimePicker").minDate(e.date);
             });
 
             $("#EndDatePicker").on("dp.change", function (e) {
-                $('#StartDatePicker').data("DateTimePicker").maxDate(e.date);
+                $("#StartDatePicker").data("DateTimePicker").maxDate(e.date);
             });
+
+            $("#GetGames").on("click", function () {
+                var startDate = $("#StartDatePicker").data("DateTimePicker").date();
+                var endDate = $("#EndDatePicker").data("DateTimePicker").date();
+                $("#matchesTbody").html("");
+
+                $.ajax({
+                    cache: false,
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    url: "/Home/GetMatches?startDate=" + moment(startDate).format("YYYY/MM/DD") + "&endDate=" + moment(endDate).format("YYYY/MM/DD"),
+                    data: {},
+                    success: function (json) {
+                        //alert(json);
+                        $.each(json, function (i, match) {
+                            appendRow(match);
+                        });
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        alert("Ajax Failed! xhr=" + xhr + ", ajaxOptions=" + ajaxOptions + ", thrownError=" + thrownError);
+                    }
+                }); // end ajax call
+            });
+
+            moment.locale("fi");
+
+            function appendRow(match) {
+                var cells =
+                    "<tr>" +
+                        "<td>" + moment.utc(match.MatchDate).format("L LT") + "</td>" +
+                        "<td>" +
+                            "<img class=\"logo\" alt=\"HomeTeam Logo\" src=\"" + match.HomeTeam.LogoUrl + "\">";
+
+                    if (match.HomeGoals > match.AwayGoals) {
+                        cells += ("<strong>" + match.HomeTeam.Name + "</strong> - " +
+                            "<img class=\"logo\" alt=\"AwayTeam Logo\" src=\"" + match.AwayTeam.LogoUrl + "\">" +
+                            match.AwayTeam.Name);
+                    }
+                    else if (match.HomeGoals < match.AwayGoals) {
+                        cells += (match.HomeTeam.Name + " - " +
+                            "<img class=\"logo\" alt=\"AwayTeam Logo\" src=\"" + match.AwayTeam.LogoUrl + "\">" +
+                            "<strong>" + match.AwayTeam.Name + "</strong>");
+                    }
+                    else {
+                        cells += (match.HomeTeam.Name + " - " +
+                            "<img class=\"logo\" alt=\"AwayTeam Logo\" src=\"" + match.AwayTeam.LogoUrl + "\">" +
+                            match.AwayTeam.Name);
+                    }
+
+                    cells += "</td><td>";
+
+                    if (match.HomeGoals > match.AwayGoals) {
+                        cells += ("<strong>" + match.HomeGoals + "</strong> - " + match.AwayGoals);
+                    }
+                    else if (match.HomeGoals < match.AwayGoals) {
+                        cells += (match.HomeGoals +" - <strong>" + match.AwayGoals + "</strong>");
+                    }
+                    else {
+                        cells += (match.HomeGoals + " - " + match.AwayGoals);
+                    }
+
+                    cells += "</td></tr>";
+
+                $(cells).appendTo("#matchesTbody");
+            }
+
         });
     </script>
 }
